@@ -1,31 +1,41 @@
-# New Docker Repository
+<h1 align="center">Docker Repository Template</h1>
 
-[![pre-commit](https://github.com/Tom-Notch/Docker-Repository-Template/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/Tom-Notch/Docker-Repository-Template/actions/workflows/pre-commit.yml)
+<p align="center">
+  <em>A GitHub repository template with Docker, pre-commit hooks, and CI/CD</em>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Tom-Notch/Docker-Repository-Template/actions/workflows/pre-commit.yml"><img src="https://github.com/Tom-Notch/Docker-Repository-Template/actions/workflows/pre-commit.yml/badge.svg" alt="pre-commit"></a>
+  <img src="https://img.shields.io/badge/Docker-Required-2496ed?logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+</p>
+
+A GitHub repository template that uses Docker for easy deployment and testing, with pre-commit hooks and GitHub Actions CI/CD included.
+
+> **TLDR:** Search for `todo` and update all occurrences to your desired name.
 
 ## Dependencies
 
 - [Docker](https://docs.docker.com/get-docker/)
 
-## Usage Guidelines
-
-TLDR: Search for `todo` and update all occurrences to your desired name
+## Usage
 
 ### Base Repository
 
 1. Change [LICENSE](LICENSE) if necessary
-
-1. Modify [.pre-commit-config.yaml](.pre-commit-config.yaml) according to your need
-
+1. Modify [.pre-commit-config.yaml](.pre-commit-config.yaml) according to your needs
 1. Modify/add GitHub workflow status badges in [README.md](README.md)
 
 ### Docker Config
 
 1. Fill in all `todo-*` placeholders directly in [.env.example](.env.example) and commit — these are project-level constants, not secrets
 
-   - `todo-docker-user` refers to your Docker Hub account username
-   - `todo-base-image` is the base image the Dockerfile builds from, such as `nvidia/cuda:13.0.0-cudnn-devel-ubuntu24.04`
-   - `todo-image-name` is the name of the image you are building
-   - `todo-image-user` is the default user inside the image, used to determine the home folder
+   | Placeholder | Description |
+   |-------------|-------------|
+   | `todo-docker-user` | Your Docker Hub account username |
+   | `todo-base-image` | Base image the Dockerfile builds from (e.g. `nvidia/cuda:13.0.0-cudnn-devel-ubuntu24.04`) |
+   | `todo-image-name` | Name of the image you are building |
+   | `todo-image-user` | Default user inside the image, used to determine the home folder |
 
 1. Copy [.env.example](.env.example) to `.env` and add any user-specific secrets or local overrides:
 
@@ -33,34 +43,29 @@ TLDR: Search for `todo` and update all occurrences to your desired name
    cp .env.example .env
    ```
 
-   - `.env` is gitignored and will NOT be committed — it is the right place for secrets and per-user values
-   - `.env` will be loaded automatically when you use docker compose for build/run/push
+   > `.env` is gitignored and will NOT be committed — it is the right place for secrets and per-user values. It is loaded automatically by docker compose.
 
 1. Modify the service name from `todo-service-name` to your service name in [docker-compose.yml](docker-compose.yml), add additional volume mounting options such as dataset directories
 
-1. Update [Dockerfile](docker/latest/Dockerfile) and [.dockerignore](.dockerignore)
+1. Update [Dockerfile](docker/latest/Dockerfile) and [.dockerignore](.dockerignore) — the existing Dockerfile includes screen & tmux config, oh-my-zsh, cmake, and other basic tools
 
-   - Existing dockerfile has screen & tmux config, oh-my-zsh, cmake, and other basic goodies
-   - Add any additional dependency installations at appropriate locations
+1. Run scripts to build, test, and push:
 
-1. [build.sh](scripts/build.sh) to build and test the image locally in your machine's architecture
+   | Script | Action |
+   |--------|--------|
+   | [build.sh](scripts/build.sh) | Build and test the image locally (uses `buildx` for multi-arch) |
+   | [run_container.sh](scripts/run_container.sh) | Run and test a built image (`docker compose up -d` also works) |
+   | [push.sh](scripts/push.sh) | Push the multi-arch image to Docker Hub |
 
-   - The scripts uses buildx to build multi-arch image, you can disable this by removing redundant archs in [docker-compose.yml](docker-compose.yml)
-   - Building stage does not have GPU access, if some of your dependencies need GPU, build them inside a running container and commit to the final image
-
-1. [run_container.sh](scripts/run_container.sh) or `docker compose up -d` to run and test a built image
-
-   - The service by default will mount the whole repository onto `CODE_FOLDER` inside the container so any modification inside also takes effect outside, which is useful when you use vscode remote extension to develop inside a running container with remote docker context
-   - You should be able to run and see GUI applications inside the container if `DISPLAY` is set correctly when you run the script
-
-1. [push.sh](scripts/push.sh) to push the multi-arch image to docker hub
-
-   - You should have the docker hub repository set up before pushing
+   > The service mounts the entire repository onto `CODE_FOLDER` inside the container — modifications inside are reflected outside, useful for VS Code remote development.
 
 ## Developer Quick Start
 
-- Run [scripts/dev_setup.sh](scripts/dev_setup.sh) to setup the development environment
+```shell
+bash scripts/dev_setup.sh
+```
 
-## Note
+## Notes
 
-- This template currently only supports docker image for amd64 and arm64, if you want to support other architectures, please modify the [build.sh](scripts/build.sh) script and [docker-compose.yml](docker-compose.yml) accordingly
+- Supports `amd64` and `arm64` Docker images. To add other architectures, modify [build.sh](scripts/build.sh) and [docker-compose.yml](docker-compose.yml).
+- The build stage has no GPU access. If your dependencies require GPU, build them inside a running container and commit to the final image.
